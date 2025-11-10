@@ -8,13 +8,9 @@ You can install the latest release of rs3 from pypi using
 
 `pip install rs3`
 
-For mac users you may also have to brew install the OpenMP library
+**For mac users:** you may have to install a compiled version of lightgbm, using conda for example, before pip installing rs3
 
-`brew install libomp`
-
-or install lightgbm without Openmp
-
-`pip install lightgbm --install-option=--nomp`
+`conda install -c conda-forge lightgbm==3.3.5`
 
 See the [LightGBM documentation](https://github.com/microsoft/LightGBM/tree/master/python-package)
 for more information
