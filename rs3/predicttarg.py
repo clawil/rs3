@@ -4,18 +4,12 @@ __all__ = ['load_target_model', 'predict_target']
 
 # Cell
 from rs3 import targetfeat
-import joblib
-import os
+from .seq import load_booster_model
 
 # Cell
 def load_target_model(lite=False):
     """Load rule set 3 target model"""
-    if lite:
-        model_name = 'target_lite_model.pkl'
-    else:
-        model_name = 'target_model.pkl'
-    model = joblib.load(os.path.join(os.path.dirname(__file__), model_name))
-    return model
+    return load_booster_model('target_lite_model' if lite else 'target_model')
 
 # Cell
 def predict_target(design_df, aa_subseq_df, domain_feature_df=None,
@@ -43,6 +37,10 @@ def predict_target(design_df, aa_subseq_df, domain_feature_df=None,
                                                                           domain_df=domain_feature_df,
                                                                           conservation_df=conservation_feature_df,
                                                                           id_cols=id_cols)
+    missing = [c for c in model.feature_names if c not in target_feature_cols]
+    if missing:
+        raise ValueError('merge_feature_dfs did not produce the features this model '
+                         'was trained on; missing: ' + ', '.join(missing))
     X_target = target_feature_df[target_feature_cols]
     predictions = model.predict(X_target)
     return predictions

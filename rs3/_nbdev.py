@@ -2,7 +2,9 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"load_seq_model": "00_seq.ipynb",
+index = {"BoosterModel": "00_seq.ipynb",
+         "load_booster_model": "00_seq.ipynb",
+         "load_seq_model": "00_seq.ipynb",
          "featurize_context": "00_seq.ipynb",
          "predict_seq": "00_seq.ipynb",
          "ensembl_post": "01_targetdata.ipynb",
