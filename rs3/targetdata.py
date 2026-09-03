@@ -14,7 +14,6 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 import warnings
 import os
-from scipy import stats
 import multiprocessing
 import io
 
@@ -235,7 +234,7 @@ def get_conservation(chr, start, end, genome):
     :param genome: str
     :return: DataFrame
     """
-    api_url = 'http://api.genome.ucsc.edu/getData/track'
+    api_url = 'https://api.genome.ucsc.edu/getData/track'
     if genome == 'hg38':
         track = 'phyloP100way'
     elif genome == 'mm39':

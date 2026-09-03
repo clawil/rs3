@@ -130,7 +130,7 @@ def featurize_aa_seqs(aa_sequences, features=None):
            'G', 'H', 'I', 'K', 'L',
            'M', 'N', 'P', 'Q', 'R',
            'S', 'T', 'V', 'W', 'Y', '*']
-    clean_aa_seqs = aa_sequences.str.replace('\*|-', '', regex=True)
+    clean_aa_seqs = aa_sequences.str.replace(r'\*|-', '', regex=True)
     feature_dict_list = []
     for i, (aa_sequence, clean_sequence) in enumerate(zip(aa_sequences, clean_aa_seqs)):
         analyzed_seq = ProteinAnalysis(clean_sequence)
