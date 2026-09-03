@@ -5,27 +5,32 @@ SRC = $(wildcard ./*.ipynb)
 all: rs3 docs
 
 rs3: $(SRC)
-	nbdev_build_lib
+	nbdev-export
 	touch rs3
 
 sync:
-	nbdev_update_lib
+	nbdev-update
 
 docs_serve: docs
-	cd docs && bundle exec jekyll serve
+	nbdev-preview
 
 docs: $(SRC)
-	nbdev_build_docs
+	nbdev-docs
 	touch docs
 
 test:
-	nbdev_test_nbs
+	nbdev-test
+	pytest
+
+# Regenerate the library, README and docs, and run the tests -- run before pushing.
+prepare:
+	nbdev-prepare
 
 release: pypi conda_release
-	nbdev_bump_version
+	nbdev-bump-version
 
 conda_release:
-	fastrelease_conda_package
+	nbdev-conda
 
 pypi: dist
 	twine upload --repository pypi dist/*

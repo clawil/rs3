@@ -40,11 +40,8 @@ dev = [
     "gpplot>=0.5.0",
     "seaborn>=0.13",
     "scipy>=1.11",
-    "jupyterlab>=3.0",
-    "nbdev>=1.1.14,<2.0.0",
-    # nbdev 1.x declares fastcore>=1.4.5 with no upper bound, but current fastcore
-    # removed fastcore.docments._docments, so nbdev 1.x cannot import without this.
-    "fastcore>=1.5,<1.6",
+    "jupyterlab>=4.0",
+    "nbdev>=3.0",
     "matplotlib>=3.8",
     "tabulate>=0.9",
     "pytest>=8.0",
