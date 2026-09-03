@@ -1,0 +1,35 @@
+# Ground-truth environment for the rs3 golden-output regression baseline.
+#
+# These are the versions rs3 0.0.18 was built and released against. They exist
+# ONLY to regenerate tests/golden/*.csv from the original pickled models, so that
+# the modernized code can be proven to reproduce the original predictions exactly.
+# Nothing in this file describes what rs3 supports going forward -- see
+# pyproject.toml (or settings.ini) for that.
+#
+# NOTE: `pip install -r` will NOT work on Apple Silicon. lightgbm 3.3.5 publishes
+# no macOS arm64 wheel for cp310 and fails to build from source. Use conda-forge:
+#
+#   mamba create -n rs3-legacy -y -c conda-forge \
+#     python=3.10 'scikit-learn==1.0.2' 'lightgbm==3.3.5' 'numpy==1.26.4' \
+#     'pandas==1.5.3' 'pyarrow==14.0.2' 'biopython==1.81' 'joblib=1.3' \
+#     'scipy=1.11' tqdm requests pytest
+#   ~/miniforge3/envs/rs3-legacy/bin/pip install 'sglearn==1.2.5'
+#
+# Then, from the repo root:
+#   ~/miniforge3/envs/rs3-legacy/bin/python tools/capture_baseline.py
+#
+# On x86_64 Linux the pins below do install from PyPI directly.
+
+python_version == 3.10
+scikit-learn == 1.0.2
+lightgbm == 3.3.5
+numpy == 1.26.4
+pandas == 1.5.3
+pyarrow == 14.0.2
+biopython == 1.81
+joblib == 1.3.2
+scipy == 1.11.4
+sglearn == 1.2.5
+tqdm == 4.66.1
+requests == 2.31.0
+pytest
