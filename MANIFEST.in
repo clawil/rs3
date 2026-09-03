@@ -2,7 +2,10 @@ include settings.ini
 include LICENSE
 include CONTRIBUTING.md
 include README.md
-include rs3/RuleSet3.pkl
-include rs3/target_model.pkl
-include rs3/target_lite_model.pkl
+include rs3/RuleSet3.txt
+include rs3/RuleSet3.json
+include rs3/target_model.txt
+include rs3/target_model.json
+include rs3/target_lite_model.txt
+include rs3/target_lite_model.json
 recursive-exclude * __pycache__

@@ -23,6 +23,17 @@ scikit-learn that wrote the pickles -- run from the repo root):
 
     ~/miniforge3/envs/rs3-legacy/bin/python tools/convert_models.py
 
+The source .pkl files were removed from the working tree once the exported
+artifacts were verified; they remain in git history. To re-run the conversion,
+restore them first:
+
+    git show 82411ac:rs3/RuleSet3.pkl          > rs3/RuleSet3.pkl
+    git show 82411ac:rs3/target_model.pkl      > rs3/target_model.pkl
+    git show 82411ac:rs3/target_lite_model.pkl > rs3/target_lite_model.pkl
+
+Re-conversion should not normally be necessary: `--verify` is the standing check,
+and it needs only the exported artifacts.
+
 VERIFY (needs neither scikit-learn nor the pickles -- run it in every environment
 you care about, especially one with lightgbm 4.x, to prove the text format reads
 forward):
