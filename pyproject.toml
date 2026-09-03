@@ -68,7 +68,7 @@ rs3 = ["*.txt", "*.json"]
 
 [tool.nbdev]
 nbs_path = '.'
-doc_path = 'docs'
+doc_path = '_docs'
 lib_path = 'rs3'
 branch = 'master'
 recursive = false

@@ -1,0 +1,24 @@
+name: Deploy to GitHub Pages
+
+# Replaces the previous setup, where Jekyll rendered committed HTML from docs/ on
+# the master branch. nbdev 3 builds the site with Quarto into _docs/ (gitignored)
+# and this workflow publishes it to the gh-pages branch.
+#
+# REPOSITORY SETTING REQUIRED: Settings > Pages > Build and deployment > Source
+# must be set to "Deploy from a branch", branch "gh-pages", folder "/ (root)".
+# Until that is changed the published site will not update.
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fastai/workflows/quarto-ghp@master

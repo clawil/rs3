@@ -144,3 +144,8 @@ conda/
 _token
 
 data/
+
+# nbdev / quarto build output
+_docs/
+_proc/
+.quarto/

@@ -1,0 +1,9 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_seq.ipynb
+      - 01_targetdata.ipynb
+      - 02_targetfeat.ipynb
+      - 03_predicttarg.ipynb
+      - 04_predict.ipynb

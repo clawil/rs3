@@ -1,0 +1,14 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "rs3"
+  site-url: "https://gpp-rnd.github.io/rs3"
+  description: "Predict the activity of CRISPR sgRNAs"
+  repo-branch: master
+  repo-url: "https://github.com/gpp-rnd/rs3"
+
+format-links:
+  - html
+  - format: commonmark
+    text: Markdown
