@@ -1,33 +1,99 @@
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly, for the network and latest-dependency jobs.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
 jobs:
-  build:
+  test:
+    name: test (python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.10 is the declared floor: this leg is what proves the dependency
+        # lower bounds in pyproject.toml are real. 3.13 is the newest supported.
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '3.9'
-        architecture: 'x64'
-    - name: Install the library
-      run: |
-        pip install nbdev jupyter
-        pip install -e .[dev]
-    - name: Read all notebooks
-      run: |
-        nbdev_read_nbs
-    - name: Check if all notebooks are cleaned
-      run: |
-        echo "Check we are starting with clean git checkout"
-        if [ -n "$(git status -uno -s)" ]; then echo "git status is not clean"; false; fi
-        echo "Trying to strip out notebooks"
-        nbdev_clean_nbs
-        echo "Check that strip out was unnecessary"
-        git status -s # display the status to see which nbs need cleaning up
-        if [ -n "$(git status -uno -s)" ]; then echo -e "!!! Detected unstripped out notebooks\n!!!Remember to run nbdev_install_git_hooks"; false; fi
-    - name: Check if there is no diff library/notebooks
-      run: |
-        if [ -n "$(nbdev_diff_nbs)" ]; then echo -e "!!! Detected difference between the notebooks and the library"; false; fi
-    - name: Run tests
-      run: |
-        nbdev_test_nbs --fname=index.ipynb --n_workers=1
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install the library
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Report the resolved stack
+        run: pip list
+
+      - name: Check the library matches the notebooks
+        run: |
+          nbdev-export
+          git diff --exit-code -- rs3/ \
+            || { echo '::error::rs3/ is out of date -- run `nbdev-export` and commit the result'; exit 1; }
+
+      - name: Check the notebooks are clean
+        run: |
+          nbdev-clean
+          git diff --exit-code -- '*.ipynb' \
+            || { echo '::error::notebooks are not clean -- run `nbdev-install-hooks`, then `nbdev-clean`'; exit 1; }
+
+      - name: Golden-output regression
+        # Asserts predictions still match what rs3 0.0.18 produced on its
+        # original 2021 dependency stack. See tests/golden/.
+        run: pytest
+
+      - name: Notebook tests
+        # Runs the assertions in the notebooks. Cells flagged `#| notest` are
+        # skipped here because they call the Ensembl and UCSC APIs; the network
+        # job below covers those.
+        run: nbdev-test
+
+  network:
+    # Split out and non-blocking on purpose. rest.ensembl.org returns
+    # intermittent 503s even for single sequential requests, so folding these
+    # into the required job would make CI failures routine and therefore
+    # ignorable. Upstream data drift is a different failure mode from a
+    # dependency regression and is worth seeing separately.
+    name: network (live Ensembl and UCSC APIs)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e '.[dev]'
+      - name: Notebook tests including live API calls
+        run: nbdev-test --flags notest
+
+  latest-deps:
+    # Early warning for the next incompatibility, rather than another four-year
+    # silent drift. Non-blocking by design.
+    name: latest dependencies (unpinned)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - name: Install with every dependency upgraded
+        run: |
+          pip install -e '.[dev]'
+          pip install --upgrade joblib pandas lightgbm tqdm pyarrow biopython requests numpy
+      - run: pip list
+      - name: Golden-output regression
+        run: pytest
