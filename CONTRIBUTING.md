@@ -7,6 +7,14 @@ Before anything else, please install the git hooks that run automatic scripts du
 nbdev-install-hooks
 ```
 
+## Working on the models
+
+The trained models ship as LightGBM text plus a JSON sidecar rather than as
+pickles. [MODELS.md](MODELS.md) explains why, how to verify them, and the two
+things that are easy to get wrong: the target models' feature order does not
+come from the model file, and the secondary structure features deliberately use
+a superseded Biopython definition.
+
 ## Did you find a bug?
 
 * Ensure the bug was not already reported by searching on GitHub under Issues.
