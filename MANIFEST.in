@@ -1,6 +1,7 @@
 include LICENSE
 include CONTRIBUTING.md
 include MODELS.md
+include CHANGELOG.md
 include README.md
 include rs3/RuleSet3.txt
 include rs3/RuleSet3.json
