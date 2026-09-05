@@ -15,6 +15,15 @@ things that are easy to get wrong: the target models' feature order does not
 come from the model file, and the secondary structure features deliberately use
 a superseded Biopython definition.
 
+## Releasing
+
+Releases are built by [.github/workflows/release.yaml](.github/workflows/release.yaml),
+triggered by pushing a `v*` tag. Publishing to PyPI is disabled until a maintainer
+configures Trusted Publishing; the workflow header lists the three steps. Until then
+a tag produces checked artifacts you can download and inspect, and nothing is
+uploaded. Update `rs3/__init__.py` and `CHANGELOG.md` before tagging -- the workflow
+fails if the tag does not match `rs3.__version__`.
+
 ## Did you find a bug?
 
 * Ensure the bug was not already reported by searching on GitHub under Issues.

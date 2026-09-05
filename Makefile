@@ -32,6 +32,10 @@ release: pypi conda_release
 conda_release:
 	nbdev-conda
 
+# Prefer releasing by pushing a version tag, which runs .github/workflows/release.yaml:
+# that checks the tag against rs3.__version__, verifies the model artifacts are in
+# the wheel, and publishes via PyPI Trusted Publishing. This target is the manual
+# fallback and performs none of those checks.
 pypi: dist
 	twine upload --repository pypi dist/*
 

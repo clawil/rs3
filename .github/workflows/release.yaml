@@ -1,0 +1,93 @@
+name: Release
+
+# Builds distributions on a version tag and, once a maintainer enables it,
+# publishes them to PyPI using Trusted Publishing (OIDC) rather than a stored
+# API token.
+#
+# PUBLISHING IS DISABLED. The build and checks below run on every tag, but the
+# publish job is skipped until all three of these are done by someone with
+# admin access to the PyPI project and this repository:
+#
+#   1. On PyPI, add a trusted publisher for the `rs3` project:
+#      https://pypi.org/manage/project/rs3/settings/publishing/
+#        owner: gpp-rnd   repository: rs3
+#        workflow: release.yaml   environment: pypi
+#   2. In this repository, create an environment named `pypi`
+#      (Settings > Environments). Add required reviewers if you want a manual
+#      approval step before each release.
+#   3. In this repository, set the variable ENABLE_PYPI_RELEASE to `true`
+#      (Settings > Secrets and variables > Actions > Variables).
+#
+# Until step 3 is done this workflow only ever produces artifacts you can
+# inspect, which is the intended default.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and check distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install build tooling
+        run: pip install build twine
+
+      - name: Check the tag matches rs3.__version__
+        # Guards against tagging v0.2.0 while __init__.py still says 0.1.0, which
+        # would otherwise publish a differently numbered release than the tag.
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(python -c "import re,pathlib; print(re.search(r'\"(.+)\"', pathlib.Path('rs3/__init__.py').read_text()).group(1))")
+          echo "tag=$tag  rs3.__version__=$version"
+          test "$tag" = "$version" \
+            || { echo "::error::tag $GITHUB_REF_NAME does not match rs3.__version__ $version"; exit 1; }
+
+      - name: Build
+        run: python -m build
+
+      - name: Check metadata
+        run: twine check dist/*
+
+      - name: Check the model artifacts are in the wheel
+        # The models are package data. A wheel that builds fine but ships without
+        # them installs cleanly and then fails at predict time.
+        run: |
+          for f in RuleSet3 target_model target_lite_model; do
+            for ext in txt json; do
+              unzip -l dist/*.whl | grep -q "rs3/$f.$ext" \
+                || { echo "::error::rs3/$f.$ext missing from the wheel"; exit 1; }
+            done
+          done
+          echo "all six model artifacts present"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    # Disabled until a maintainer sets ENABLE_PYPI_RELEASE -- see the header.
+    if: github.event_name == 'push' && vars.ENABLE_PYPI_RELEASE == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      # Required for Trusted Publishing. No PyPI token is stored anywhere.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
